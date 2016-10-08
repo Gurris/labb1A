@@ -48,7 +48,6 @@ public class CommHandler {
         long start = System.currentTimeMillis();
         try{
             sock.setSoTimeout(1000);
-
         }catch (Exception e){
             System.out.println("Broken socket");
             return null;
@@ -61,24 +60,21 @@ public class CommHandler {
                 sock.receive(receivedPack);
                 newClient = new Client(receivedPack.getAddress(), receivedPack.getPort());
                 if (currentClient == null) {
-                    if(clientQueue.size()>0){
-                        currentClient = clientQueue.poll();
-                        sendMessage("Your turn", currentClient);
-                    } else {
-                        currentClient = newClient;
-                    }
-                    sock.setSoTimeout(10000);
+                    System.out.println("current client is null");
+                    System.out.println("client from message is current now");
+                    currentClient = newClient;
                 }
                 if (authClient()) {
                     return new String(receivedPack.getData(), receivedPack.getOffset(), receivedPack.getLength());
                 } else {
+                    System.out.println("???");
                     addClientToQueue(newClient);
                 }
             }catch (Exception e){
-                System.out.println("Maybe kill server!");
             }
 
         }
+        System.out.println("timeout");
         return "TIMEOUT";
     }
 
@@ -114,5 +110,10 @@ public class CommHandler {
     }
     public void removeCurrentClient(){
         this.currentClient = null;
+        if(clientQueue.size()>0){
+            System.out.println("Getting client from clientlist");
+            currentClient = clientQueue.poll();
+            sendMessage("Your turn", currentClient);
+        }
     }
 }

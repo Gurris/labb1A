@@ -46,27 +46,21 @@ public class Client {
             while (isRunning) {
                 System.out.print(">");
                 sendMessage(input.nextLine());
-                System.out.println(readMessage());
-            }
-            close();
-        }
-        //*/
-        /*
-        if(init()) {
-            Scanner input = new Scanner(System.in);
-            System.out.println("spam");
-            while (isRunning) {
-                try{
-                    sendMessage("HEJ");
-                    Thread.sleep(100);
-                }catch (Exception e){
+                String msg = readMessage();
+                if(msg.equals("BUSY, ADDED TO THE QUEUE")){
+                    System.out.println("Server is busy");
+                    try{
+                        sock.setSoTimeout(60000); // wait for 1 min before quit
+                    }catch (Exception e){
 
+                    }
+                    msg = readMessage();
                 }
-
+                System.out.println(msg);
             }
             close();
         }
-        */
+
     }
     private void sendMessage(String message){
             sendData = message.getBytes();

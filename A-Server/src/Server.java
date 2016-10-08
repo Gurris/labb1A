@@ -6,23 +6,27 @@ public class Server {
     public Server() {
 
     }
+
     public void start(){
             commHandler = new CommHandler(SERVER_PORT);
             System.out.println("Starting server...");
             while(true){
-                listen();
-                startGame();
+                if(listen()){
+                    startGame();
+                }
             }
             //close();
     }
 
-    private void listen(){
+    private boolean listen(){
         String msgReceived;
-        boolean isListening = true;
         boolean ready = false;
-        while (isListening){
+        while(true){
             msgReceived = commHandler.readMessage();
+
             if(msgReceived.equals("TIMEOUT")){
+                commHandler.removeCurrentClient();
+                return false;
             }else{
                 if(msgReceived!=null) {
                     if (msgReceived.equals("HELLO")) {
@@ -30,15 +34,14 @@ public class Server {
                         ready = true;
                     } else if (msgReceived.equals("START") && ready) {
                         commHandler.sendMessage("READY");
-                        isListening = false;
+                        return true;
                     } else {
                         commHandler.sendMessage("ERROR");
+                        return false;
                     }
                 }
             }
-
         }
-
     }
 
     private void startGame() {
