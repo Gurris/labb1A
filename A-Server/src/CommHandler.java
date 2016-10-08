@@ -17,6 +17,7 @@ public class CommHandler {
             this.sock = new DatagramSocket(port);
         } catch (SocketException e) {
             System.out.println(e.getMessage());
+            closeSock();
         }
         currentClient=null;
         clientQueue = new LinkedList<>();
@@ -31,6 +32,7 @@ public class CommHandler {
             e.getMessage();
         }
     }
+
     public void sendMessage(String message, Client client){
         byte[] data = message.getBytes();
         DatagramPacket sendPack = new DatagramPacket(data, data.length, client.getAddr(), client.getPort());
@@ -60,21 +62,17 @@ public class CommHandler {
                 sock.receive(receivedPack);
                 newClient = new Client(receivedPack.getAddress(), receivedPack.getPort());
                 if (currentClient == null) {
-                    System.out.println("current client is null");
-                    System.out.println("client from message is current now");
                     currentClient = newClient;
                 }
                 if (authClient()) {
                     return new String(receivedPack.getData(), receivedPack.getOffset(), receivedPack.getLength());
                 } else {
-                    System.out.println("???");
                     addClientToQueue(newClient);
                 }
             }catch (Exception e){
             }
 
         }
-        System.out.println("timeout");
         return "TIMEOUT";
     }
 
@@ -109,9 +107,11 @@ public class CommHandler {
         }
     }
     public void removeCurrentClient(){
+        if(currentClient != null){
+            sendMessage("Disconnected from server", currentClient);
+        }
         this.currentClient = null;
         if(clientQueue.size()>0){
-            System.out.println("Getting client from clientlist");
             currentClient = clientQueue.poll();
             sendMessage("Your turn", currentClient);
         }

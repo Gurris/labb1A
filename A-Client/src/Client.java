@@ -27,7 +27,7 @@ public class Client {
             serverAddr = InetAddress.getByName(serverName);
             sock = new DatagramSocket();
             sendPack = new DatagramPacket(sendData, sendData.length, serverAddr, SERVER_PORT);
-            sock.setSoTimeout(5000);
+            sock.setSoTimeout(10000);
         } catch (UnknownHostException e) {
             System.out.println(e.getMessage());
             return false;
@@ -51,10 +51,15 @@ public class Client {
                     System.out.println("Server is busy");
                     try{
                         sock.setSoTimeout(60000); // wait for 1 min before quit
+                        msg = readMessage();
+                        sock.setSoTimeout(10000);
                     }catch (Exception e){
 
                     }
-                    msg = readMessage();
+
+                }else if(msg.equals("Disconnected from server")){
+                    System.out.println("you got disconnected from the server");
+                    System.exit(1);
                 }
                 System.out.println(msg);
             }
